@@ -194,6 +194,7 @@ fn parse_root_sdt(comptime T: type, addr: usize) void {
 }
 
 export fn laihost_log(kind: c_int, str: [*:0]const u8) void {
+  os.log("SusLog 0x{X}\n", .{@ptrToInt(&str)});
   os.log("[{s}]: {s}\n", .{
     switch(kind) {
       lai.LAI_WARN_LOG  => @as([]const u8, "LAI WARN"),
@@ -205,15 +206,22 @@ export fn laihost_log(kind: c_int, str: [*:0]const u8) void {
 }
 
 fn impl_laihost_scan_table(addr: usize, name: *const [4]u8, index: *c_int) ?*c_void {
+  os.log("SusTable 0x{X} 0x{X} 0x{X}\n", .{addr, @ptrToInt(name), @ptrToInt(index)});
   const table = get_sdt(addr);
   if(std.mem.eql(u8, table[0..4], name)) {
-    if(index.* == 0) return @ptrCast(*c_void, table.ptr);
+    if(index.* == 0) {
+      os.log("Sus2 0x{X}\n", .{@ptrToInt(table.ptr)});
+      return @ptrCast(*c_void, table.ptr);
+    }
     index.* -= 1;
   }
+  os.log("Sus3 \n", .{});
   return null;
 }
 
 fn impl_laihost_scan_root(comptime T: type, addr: usize, name: *const [4]u8, index_c: c_int) ?*c_void {
+  os.log("SusRoot 0x{X} 0x{X}\n", .{addr, @ptrToInt(name)});
+  
   const sdt = get_sdt(addr);
 
   var index = index_c;
@@ -228,6 +236,8 @@ fn impl_laihost_scan_root(comptime T: type, addr: usize, name: *const [4]u8, ind
 }
 
 export fn laihost_scan(name: *const [4]u8, index: c_int) ?*c_void {
+  os.log("SusScan2 0x{X}\n", .{@ptrToInt(name)});
+
   if(index == 0) {
     if(std.mem.eql(u8, name, "RSDT")) return @ptrCast(*c_void, get_sdt(rsdp.rsdt_addr).ptr);
     if(std.mem.eql(u8, name, "XSDT")) return @ptrCast(*c_void, get_sdt(rsdp.xsdt_addr).ptr);
@@ -246,16 +256,21 @@ export fn laihost_scan(name: *const [4]u8, index: c_int) ?*c_void {
 }
 
 export fn laihost_panic(err: [*:0]const u8) noreturn {
+  os.log("SusPanic 0x{X}\n", .{@ptrToInt(err)});
+
   has_lai_acpi = false;
   os.log("[LAI PANIC]: {s}\n", .{err});
   @panic("LAI PANIC");
 }
 
 export fn laihost_map(addr: usize, size: usize) ?*c_void {
+  os.log("SusMap 0x{X}\n", .{addr});
   return os.platform.phys_ptr(*c_void).from_int(addr).get_uncached();
 }
 
-export fn laihost_unmap(ptr: *c_void, size: usize) void { }
+export fn laihost_unmap(ptr: *c_void, size: usize) void {
+  os.log("SusUnmap 0x{X}\n", .{ptr});
+}
 
 var has_lai_acpi = false;
 
@@ -274,6 +289,7 @@ pub fn init_acpi() !void {
   }
 
   lai.lai_set_acpi_revision(rsdp.revision);
+  os.log("SusBefore\n", .{});
   lai.lai_create_namespace();
   has_lai_acpi = true;
 }

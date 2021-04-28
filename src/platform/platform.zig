@@ -62,7 +62,7 @@ pub fn page_fault(addr: usize, present: bool, access: PageFaultAccess, frame: an
     }
   }
 
-  os.log("Platform: Uhandled page fault while {} at 0x{x}, present: {}\n",
+  os.log("Platform: Unhandled page fault while {s} at 0x{x}, present: {}\n",
     .{
       switch(access) {
         .Read => @as([]const u8, "reading"),

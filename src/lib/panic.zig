@@ -11,7 +11,7 @@ var panic_counter: usize = 0;
 /// You only panic once
 const YOPO = false;
 
-pub fn panic(message_in: ?[]const u8, stack_trace: ?*StackTrace) noreturn {
+pub fn panic(message_in: ?[]const u8, stack_trace: ?*StackTrace) void {
     const panic_num = @atomicRmw(usize, &panic_counter, .Add, 1, .AcqRel) + 1;
 
     const cpu = os.platform.thread.get_current_cpu();
@@ -22,7 +22,7 @@ pub fn panic(message_in: ?[]const u8, stack_trace: ?*StackTrace) noreturn {
     if(YOPO and panic_num != 1)
         os.platform.hang();
 
-    os.log("PANIC {}: CPU {}: {}!\n", .{panic_num, cpu_id, message});
+    os.log("PANIC {}: CPU {}: {s}!\n", .{panic_num, cpu_id, message});
 
     if (stack_trace) |trace| {
         os.log("TODO: print stack trace.\nI bet this is very helpful. No problem.\n", .{});

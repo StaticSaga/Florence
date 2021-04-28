@@ -85,7 +85,7 @@ fn make_exec(b: *Builder, arch: builtin.Arch, ctx: Context, filename: []const u8
     exec.addBuildOption([]const u8, "source_blob_path", b.fmt("../../{s}", .{source_blob_path}));
     target(exec, arch, ctx);
     add_libs(exec);
-    exec.setBuildMode(.ReleaseSafe);
+    exec.setBuildMode(.Debug);
     exec.strip = false;
     exec.setMainPkgPath("src/");
     exec.setOutputDir(b.cache_root);
@@ -102,7 +102,7 @@ fn build_kernel(b: *Builder, arch: builtin.Arch, name: []const u8) *std.build.Li
     const main_file = b.fmt("src/boot/{s}.zig", .{name});
 
     const kernel = make_exec(b, arch, .kernel, kernel_filename, main_file);
-    kernel.addAssemblyFile(b.fmt("src/boot/{s}_{s}.asm", .{ name, @tagName(arch) }));
+    kernel.addAssemblyFile(b.fmt("src/boot/{s}_{s}.s", .{ name, @tagName(arch) }));
     kernel.setLinkerScriptPath("src/kernel/kernel.ld");
 
     const laipath = "src/extern/lai/";

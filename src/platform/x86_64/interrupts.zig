@@ -68,7 +68,7 @@ fn page_fault_handler(frame: *InterruptFrame) void {
     :[addr] "=r" (-> usize)
   );
   const page_fault_type = type_page_fault(frame.ec) catch |err| {
-    os.log("Interrupts: Page fault at addr 0x{x}, but we couldn't determine what type. (error code was 0x{x}).\nCaught error {}.\n", .{page_fault_addr, frame.ec, @errorName(err)});
+    os.log("Interrupts: Page fault at addr 0x{x}, but we couldn't determine what type. (error code was 0x{x}).\nCaught error {s}.\n", .{page_fault_addr, frame.ec, @errorName(err)});
     frame.dump();
     os.platform.hang();
   };
